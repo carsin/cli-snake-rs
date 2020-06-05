@@ -1,29 +1,24 @@
-extern crate piston_window;
+extern crate crossterm;
 
-use piston_window::*;
+use std::io::{stdout, Write};
+use crossterm::{
+    execute, queue, ExecutableCommand, QueueableCommand, cursor,
+    style::Print,
+    terminal::{self, EnterAlternateScreen, LeaveAlternateScreen, Clear, ClearType},
+    Result,
+};
 
-fn main() {
-    let mut window: PistonWindow = WindowSettings::new("Snake", [640, 480]).exit_on_esc(true).build().unwrap_or_else(|e| panic!("Failed to build PistonWindow: {}", e));
 
-    let mut x: f64 = 0.0;
-    // Game loop
-    while let Some(e) = window.next() {
-        // Rendering logic
-        if let Some(Button::Keyboard(key)) = e.press_args() {
-            println!("{:?}", key);
-        }
+mod map;
 
-        x += 1 as f64;
+fn main() -> Result<()> {
+    terminal::enable_raw_mode()?;
+    stdout().execute(Clear(ClearType::All))?;
+    let game = map::Map::initialize(20, 20);
+    game.render();
+    terminal::disable_raw_mode()?;
 
-        window.draw_2d(&e, |c, g, _| {
-            clear([0.5, 1.0, 0.5, 1.0], g);
-            rectangle(
-                [1.0, 0.0, 0.0, 1.0],
-                [x, x, 100.0, 100.0],
-                c.transform,
-                g,
-            );
-        });
-
-    }
+    Ok(())
 }
+
+
