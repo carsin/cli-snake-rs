@@ -3,21 +3,28 @@ extern crate crossterm;
 use std::io::{stdout, Write};
 use crossterm::{
     execute, queue, ExecutableCommand, QueueableCommand, cursor,
-    style::Print,
-    terminal::{self, EnterAlternateScreen, LeaveAlternateScreen, Clear, ClearType},
+    terminal::{self, EnterAlternateScreen, LeaveAlternateScreen},
     Result,
 };
 
 
-mod map;
+mod game;
 
 fn main() -> Result<()> {
+    stdout().execute(EnterAlternateScreen)?;
     terminal::enable_raw_mode()?;
-    stdout().execute(Clear(ClearType::All))?;
-    let game = map::Map::initialize(20, 20);
-    game.render();
-    terminal::disable_raw_mode()?;
 
+    let mut game = game::Game {
+        width: 30,
+        height: 20,
+        tiles: vec![],
+    };
+
+    game.tiles = game.init_map();
+
+    game.render_map().expect("Failed to render game.");
+
+    terminal::disable_raw_mode()?;
     Ok(())
 }
 
