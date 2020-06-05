@@ -1,2 +1,2 @@
-# cli-snake-rs
-A CLI snake game written in Rust.
+# snake-rs
+A snake game written in Rust.
