@@ -1,11 +1,4 @@
-use std::io::{stdout, Write};
-
-use crossterm::{
-    execute, queue, ExecutableCommand, QueueableCommand, cursor,
-    style::Print,
-    terminal::{self, EnterAlternateScreen, LeaveAlternateScreen, Clear, ClearType},
-    Result,
-};
+use std::io::{Write};
 
 #[derive(PartialEq, Copy, Clone)]
 pub enum Tile {
@@ -40,20 +33,17 @@ impl Game {
         (y * self.width) + x
     }
 
-    pub fn render_map(&self) -> Result<()> {
-        stdout().execute(Clear(ClearType::All))?;
+    pub fn render_map(&self, stdout: &mut termion::raw::RawTerminal<std::io::Stdout>){
         for x in 0..self.width {
             for y in 0..self.height {
                 let tile_char = match self.tiles[self.get_index(x, y)] {
                     Tile::Empty => ".",
                     Tile::Wall => "#",
                 };
-                stdout().queue(cursor::MoveTo(x as u16, y as u16))?
-                        .queue(Print(tile_char))?;
+
+                write!(stdout, "{}{}", termion::cursor::Goto((x + 1) as u16, (y + 1) as u16), tile_char).unwrap();
             }
         }
-        stdout().flush().unwrap();
-        Ok(())
     }
 }
 

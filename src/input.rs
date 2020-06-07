@@ -4,6 +4,9 @@ use std::sync::mpsc::Receiver;
 use std::sync::mpsc::TryRecvError;
 use std::{thread, time};
 
+use termion::event::Key;
+use termion::input::TermRead;
+
 pub fn spawn_input_channel() -> Receiver<String> {
     let (tx, rx) = mpsc::channel::<String>();
     let stdin = stdin();

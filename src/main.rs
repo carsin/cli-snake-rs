@@ -1,19 +1,17 @@
-extern crate crossterm;
+extern crate termion;
 
 use std::io::{stdout, Write};
-use crossterm::{
-    execute, queue, ExecutableCommand, QueueableCommand,
-    terminal::{self, EnterAlternateScreen, LeaveAlternateScreen},
-    Result,
-};
+use termion::raw::IntoRawMode;
 
 
 mod game;
-mod input;
+// mod input;
 
-fn main() -> Result<()> {
-    terminal::enable_raw_mode()?;
-    stdout().execute(EnterAlternateScreen)?;
+fn main() {
+    let mut stdout = stdout().into_raw_mode().unwrap();
+    // Clear terminal
+    write!(stdout, "{}{}{}", termion::cursor::Goto(1,1), termion::clear::All, termion::cursor::Hide).unwrap();
+    stdout.flush().unwrap();
 
     let mut game = game::Game {
         width: 30,
@@ -22,11 +20,10 @@ fn main() -> Result<()> {
     };
 
     game.tiles = game.init_map();
-    let input = input::spawn_input_channel();
+    // let input = input::spawn_input_channel();
 
-    game.render_map().expect("Failed to render game.");
+    game.render_map(&mut stdout);
 
     // stdout().execute(LeaveAlternateScreen)?;
-    terminal::disable_raw_mode()?;
-    Ok(())
+    write!(stdout, "{}", termion::cursor::Show).unwrap();
 }
