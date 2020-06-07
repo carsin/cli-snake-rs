@@ -1,49 +1,22 @@
-//! Demonstrates how to read events asynchronously with async-std.
-//!
-//! cargo run --features="event-stream" --example event-stream-async-std
+use std::io::{stdin};
+use std::sync::mpsc;
+use std::sync::mpsc::Receiver;
+use std::sync::mpsc::TryRecvError;
+use std::{thread, time};
 
-use std::{
-    io::{stdout, Write},
-    time::Duration,
-};
+pub fn spawn_input_channel() -> Receiver<String> {
+    let (tx, rx) = mpsc::channel::<String>();
+    let stdin = stdin();
 
-use futures::{future::FutureExt, select, StreamExt};
+    thread::spawn(move || loop {
+        let mut buffer = [0u8; 1];
+        stdin.read_exact(&mut buffer).unwrap();
+        tx.send(buffer).unwrap();
+    });
 
-use crossterm::{
-    cursor::position,
-    event::{DisableMouseCapture, EnableMouseCapture, Event, EventStream, KeyCode},
-    execute,
-    terminal::{disable_raw_mode, enable_raw_mode},
-    Result,
-};
+    rx
+}
 
+pub fn listen() {
 
-pub async fn print_events() {
-    let mut reader = EventStream::new();
-
-    loop {
-        let mut delay = Delay::new(Duration::from_millis(1_000)).fuse();
-        let mut event = reader.next().fuse();
-
-        select! {
-            _ = delay => { println!(".\r"); },
-            maybe_event = event => {
-                match maybe_event {
-                    Some(Ok(event)) => {
-                        println!("Event::{:?}\r", event);
-
-                        if event == Event::Key(KeyCode::Char('c').into()) {
-                            println!("Cursor position: {:?}\r", position());
-                        }
-
-                        if event == Event::Key(KeyCode::Esc.into()) {
-                            break;
-                        }
-                    }
-                    Some(Err(e)) => println!("Error: {:?}\r", e),
-                    None => break,
-                }
-            }
-        };
-    }
 }

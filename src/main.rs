@@ -2,7 +2,7 @@ extern crate crossterm;
 
 use std::io::{stdout, Write};
 use crossterm::{
-    execute, queue, ExecutableCommand, QueueableCommand, cursor,
+    execute, queue, ExecutableCommand, QueueableCommand,
     terminal::{self, EnterAlternateScreen, LeaveAlternateScreen},
     Result,
 };
@@ -22,8 +22,8 @@ fn main() -> Result<()> {
     };
 
     game.tiles = game.init_map();
+    let input = input::spawn_input_channel();
 
-    async_std::task::block_on(input::print_events());
     game.render_map().expect("Failed to render game.");
 
     // stdout().execute(LeaveAlternateScreen)?;
