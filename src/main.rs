@@ -9,6 +9,7 @@ use crossterm::{
 
 
 mod game;
+mod input;
 
 fn main() -> Result<()> {
     terminal::enable_raw_mode()?;
@@ -22,11 +23,10 @@ fn main() -> Result<()> {
 
     game.tiles = game.init_map();
 
+    async_std::task::block_on(input::print_events());
     game.render_map().expect("Failed to render game.");
 
     // stdout().execute(LeaveAlternateScreen)?;
     terminal::disable_raw_mode()?;
     Ok(())
 }
-
-
