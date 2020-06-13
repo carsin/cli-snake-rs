@@ -2,15 +2,15 @@ extern crate termion;
 
 use std::io::{stdout, Write};
 use termion::raw::IntoRawMode;
-
+// use termion::screen::*;
 
 mod game;
-// mod input;
+mod input;
 
 fn main() {
     let mut stdout = stdout().into_raw_mode().unwrap();
     // Clear terminal
-    write!(stdout, "{}{}{}", termion::cursor::Goto(1,1), termion::clear::All, termion::cursor::Hide).unwrap();
+    write!(stdout, "{}{}", termion::clear::All, termion::cursor::Hide).unwrap();
     stdout.flush().unwrap();
 
     let mut game = game::Game {
@@ -20,10 +20,8 @@ fn main() {
     };
 
     game.tiles = game.init_map();
-    // let input = input::spawn_input_channel();
-
+    input::listen();
     game.render_map(&mut stdout);
 
-    // stdout().execute(LeaveAlternateScreen)?;
     write!(stdout, "{}", termion::cursor::Show).unwrap();
 }

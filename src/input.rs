@@ -1,25 +1,18 @@
-use std::io::{stdin};
-use std::sync::mpsc;
-use std::sync::mpsc::Receiver;
-use std::sync::mpsc::TryRecvError;
-use std::{thread, time};
+extern crate termion;
 
-use termion::event::Key;
-use termion::input::TermRead;
-
-pub fn spawn_input_channel() -> Receiver<String> {
-    let (tx, rx) = mpsc::channel::<String>();
-    let stdin = stdin();
-
-    thread::spawn(move || loop {
-        let mut buffer = [0u8; 1];
-        stdin.read_exact(&mut buffer).unwrap();
-        tx.send(buffer).unwrap();
-    });
-
-    rx
-}
+use termion::raw::IntoRawMode;
+use termion::async_stdin;
+use std::io::{Read, Write, stdout};
+use std::thread;
+use std::time::Duration;
 
 pub fn listen() {
+    let mut stdin = async_stdin().bytes();
 
+    loop {
+        let b = stdin.next();
+        if let Some(Ok(b'q')) = b {
+            break;
+        }
+    }
 }

@@ -44,6 +44,7 @@ impl Game {
                 write!(stdout, "{}{}", termion::cursor::Goto((x + 1) as u16, (y + 1) as u16), tile_char).unwrap();
             }
         }
+        stdout.flush().unwrap();
     }
 }
 
