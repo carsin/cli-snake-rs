@@ -24,13 +24,7 @@ fn main() {
     });
 
     // Set up game
-    let mut game = game::Game {
-        width: 30,
-        height: 20,
-        tiles: vec![],
-    };
-
-    game.tiles = game.init_map();
+    let game = game::Game::new(20, 30);
 
     // Game loop
     let mut playing = true;
