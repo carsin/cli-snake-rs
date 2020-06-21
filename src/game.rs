@@ -1,9 +1,10 @@
 use std::io::{stdout, Write};
 use crossterm::{cursor, QueueableCommand};
+use rand::Rng;
 
 #[derive(PartialEq, Copy, Clone)]
 pub enum Tile {
-    Wall, Empty
+    Wall, Empty, Apple
 }
 
 pub struct Game {
@@ -41,6 +42,11 @@ impl Game {
             let right = self.get_index(self.width - 1, y);
             self.tiles[right] = Tile::Wall;
         }
+
+        let mut rng = rand::thread_rng();
+        let random_tile = self.get_index(rng.gen_range(1, self.width - 1), rng.gen_range(1, self.height - 1));
+        self.tiles[random_tile] = Tile::Apple;
+
     }
 
     fn get_index(&self, x: usize, y: usize) -> usize {
@@ -48,12 +54,12 @@ impl Game {
     }
 
     pub fn render_map(&self) {
-        //let mut map = String::new();
         for x in 0..self.width {
             for y in 0..self.height {
                 let current_char = match self.tiles[self.get_index(x, y)] {
                     Tile::Empty => ".",
                     Tile::Wall => "#",
+                    Tile::Apple => "$",
                 };
 
                 stdout().queue(cursor::MoveTo(x as u16, (y + 1) as u16)).unwrap()
