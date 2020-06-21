@@ -1,4 +1,4 @@
-use std::io::{Write};
+use std::io::Write;
 
 #[derive(PartialEq, Copy, Clone)]
 pub enum Tile {
@@ -14,7 +14,6 @@ pub struct Game {
 impl Game {
     pub fn init_map(&self) -> Vec<Tile> {
         let mut map = vec![Tile::Empty; self.width * self.height];
-
         // Border the map with walls
         for x in 0..self.width {
             map[self.get_index(x, 0)] = Tile::Wall;
