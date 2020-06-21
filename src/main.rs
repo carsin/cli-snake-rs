@@ -1,27 +1,47 @@
-extern crate termion;
+extern crate crossterm;
 
-use std::io::{stdout, Write};
-use termion::raw::IntoRawMode;
-// use termion::screen::*;
-
-mod game;
-mod input;
+use crossterm::{cursor, terminal, ExecutableCommand, QueueableCommand};
+use std::io::{stdin, stdout, Read, Write};
+use std::sync::mpsc::channel;
 
 fn main() {
-    let mut stdout = stdout().into_raw_mode().unwrap();
-    // Clear terminal
-    write!(stdout, "{}{}", termion::clear::All, termion::cursor::Hide).unwrap();
-    stdout.flush().unwrap();
+    // Set up terminal
+    stdout().execute(terminal::EnterAlternateScreen).unwrap();
+    terminal::enable_raw_mode().unwrap();
+    stdout().execute(cursor::Hide).unwrap();
 
-    let mut game = game::Game {
-        width: 30,
-        height: 20,
-        tiles: vec![],
-    };
+    // Set up input
+    let (ctrls_sender, ctrls_receiver) = channel::<char>();
+    std::thread::spawn(move || {
+        loop {
+            let mut buf = [0u8; 1]; // create a buffer for a single byte
+            stdin().read_exact(&mut buf).unwrap(); // read byte into the buffer
+            ctrls_sender.send(buf[0] as char).unwrap(); // send char on channel
+        }
+    });
 
-    game.tiles = game.init_map();
-    input::listen();
-    game.render_map(&mut stdout);
+    // Game loop
+    let mut playing = true;
+    while playing {
+        stdout().queue(terminal::Clear(terminal::ClearType::All)).unwrap();
 
-    write!(stdout, "{}", termion::cursor::Show).unwrap();
+        while let Ok(ctrl) = ctrls_receiver.try_recv() {
+            match ctrl {
+                'q' => playing = false,
+                _ => (),
+            }
+        }
+
+        // Render
+        stdout()
+            .queue(cursor::MoveTo(0, 0)).unwrap()
+            .write("move with wasd, press q to exit".as_bytes()).unwrap();
+        stdout().flush().unwrap();
+    }
+
+    // Restore terminal after game is finished
+    stdout().execute(cursor::Show).unwrap();
+    terminal::disable_raw_mode().unwrap();
+    stdout().execute(terminal::LeaveAlternateScreen).unwrap();
+    println!("Game exited");
 }
