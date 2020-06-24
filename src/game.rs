@@ -88,9 +88,10 @@ impl Game {
     pub fn update(&mut self) {
         // Update tail
         let index = self.get_index(self.snake.x, self.snake.y);
-        self.tiles[snake_index] = Tile::Empty;
+        self.tiles[index] = Tile::Empty;
 
         // Move snake
+        // TODO: Implement checks for next movement (wall / snake = lose, apple = grow)
         match self.snake.direction {
             Direction::North => self.snake.y -= 1,
             Direction::South => self.snake.y += 1,
@@ -101,7 +102,7 @@ impl Game {
 
         // Set snake on map
         let index = self.get_index(self.snake.x, self.snake.y);
-        self.tiles[snake_index] = Tile::Snake;
+        self.tiles[index] = Tile::Snake;
     }
 
     pub fn render_map(&self) {
