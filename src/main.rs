@@ -6,6 +6,9 @@ use std::sync::mpsc::channel;
 use std::thread::sleep;
 use std::time::{Duration, Instant};
 
+const GAME_WIDTH: usize = 30;
+const GAME_HEIGHT: usize = GAME_WIDTH / 2;
+
 mod game;
 
 fn main() {
@@ -26,7 +29,8 @@ fn main() {
     });
 
     // Set up game
-    let game = game::Game::new(30, 15);
+    let snake = game::Snake::new(1, 4, GAME_HEIGHT / 2, game::Direction::East);
+    let mut game = game::Game::new(GAME_WIDTH, GAME_HEIGHT, snake);
 
     // Game loop
     let update_speed = Duration::from_millis(1000 / 60); // 60 TPS
@@ -38,24 +42,26 @@ fn main() {
         let dt = now.duration_since(past);
         past = now;
 
-        stdout.queue(terminal::Clear(terminal::ClearType::All)).unwrap();
+        // Clear terminal
+        stdout.execute(terminal::Clear(terminal::ClearType::All)).unwrap();
 
         // Listen for input
-        while let Ok(ctrl) = input_receiver.try_recv() {
-            match ctrl {
+        while let Ok(char) = input_receiver.try_recv() {
+            match char {
                 'q' => playing = false,
+                'a' => game.place_apple(),
                 _ => (),
             }
         }
 
+        // Update
+        game.update();
+
         // Render
-        stdout.queue(cursor::MoveTo(0, 0)).unwrap()
-            .write("hello :D".as_bytes()).unwrap();
-
         game.render_map();
-
         stdout.flush().unwrap();
 
+        // Limit rate at which game is updated
         if dt < update_speed {
             sleep(update_speed - dt);
             continue;
