@@ -1,6 +1,6 @@
 extern crate crossterm;
 
-use crossterm::{cursor, terminal, ExecutableCommand, QueueableCommand};
+use crossterm::{cursor, terminal, ExecutableCommand};
 use std::io::{stdin, stdout, Read, Write};
 use std::sync::mpsc::channel;
 use std::thread::sleep;
@@ -8,6 +8,7 @@ use std::time::{Duration, Instant};
 
 const GAME_WIDTH: usize = 30;
 const GAME_HEIGHT: usize = GAME_WIDTH / 2;
+const TICK_SPEED: u64 = 10;
 
 mod game;
 
@@ -33,7 +34,7 @@ fn main() {
     let mut game = game::Game::new(GAME_WIDTH, GAME_HEIGHT, snake);
 
     // Game loop
-    let update_speed = Duration::from_millis(1000 / 60); // 60 TPS
+    let update_speed = Duration::from_millis(1000 / TICK_SPEED);
     let mut past = Instant::now();
 
     let mut playing = true;
@@ -49,7 +50,11 @@ fn main() {
         while let Ok(char) = input_receiver.try_recv() {
             match char {
                 'q' => playing = false,
-                'a' => game.place_apple(),
+                'w' => game.snake.direction = game::Direction::North,
+                'a' => game.snake.direction = game::Direction::West,
+                's' => game.snake.direction = game::Direction::South,
+                'd' => game.snake.direction = game::Direction::East,
+                'r' => game.place_apple(),
                 _ => (),
             }
         }

@@ -7,6 +7,28 @@ pub enum Tile {
     Wall, Empty, Apple, Snake
 }
 
+pub enum Direction {
+    North, South, East, West
+}
+
+pub struct Snake {
+    pub length: usize,
+    pub x: usize,
+    pub y: usize,
+    pub direction: Direction,
+}
+
+impl Snake {
+    pub fn new(init_length: usize, init_x: usize, init_y: usize, init_direction: Direction) -> Self {
+        Snake {
+            length: init_length,
+            x: init_x,
+            y: init_y,
+            direction: init_direction,
+        }
+    }
+}
+
 pub struct Game {
     pub width: usize,
     pub height: usize,
@@ -29,7 +51,6 @@ impl Game {
 
     fn init_map(&mut self) {
         self.tiles = vec![Tile::Empty; self.width * self.height];
-
         // Border the map with walls
         for x in 0..self.width {
             let top = self.get_index(x, 0);
@@ -65,7 +86,21 @@ impl Game {
     }
 
     pub fn update(&mut self) {
-        let snake_index = self.get_index(self.snake.x, self.snake.y);
+        // Update tail
+        let index = self.get_index(self.snake.x, self.snake.y);
+        self.tiles[snake_index] = Tile::Empty;
+
+        // Move snake
+        match self.snake.direction {
+            Direction::North => self.snake.y -= 1,
+            Direction::South => self.snake.y += 1,
+            Direction::East => self.snake.x += 1,
+            Direction::West => self.snake.x -= 1,
+            _ => (),
+        }
+
+        // Set snake on map
+        let index = self.get_index(self.snake.x, self.snake.y);
         self.tiles[snake_index] = Tile::Snake;
     }
 
@@ -82,28 +117,6 @@ impl Game {
                 stdout().queue(cursor::MoveTo(x as u16, y as u16)).unwrap()
                     .write(current_char.as_bytes()).unwrap();
             }
-        }
-    }
-}
-
-pub enum Direction {
-    North, South, East, West
-}
-
-pub struct Snake {
-    pub length: usize,
-    pub x: usize,
-    pub y: usize,
-    pub direction: Direction,
-}
-
-impl Snake {
-    pub fn new(init_length: usize, init_x: usize, init_y: usize, init_direction: Direction) -> Self {
-        Snake {
-            length: init_length,
-            x: init_x,
-            y: init_y,
-            direction: init_direction,
         }
     }
 }
