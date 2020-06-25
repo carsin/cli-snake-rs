@@ -7,8 +7,8 @@ use std::thread::sleep;
 use std::time::{Duration, Instant};
 
 const GAME_WIDTH: usize = 30;
-const GAME_HEIGHT: usize = GAME_WIDTH / 2;
-const TICK_SPEED: u64 = 10;
+const GAME_HEIGHT: usize = GAME_WIDTH;
+const TICK_SPEED: u64 = 5;
 
 mod game;
 
@@ -39,12 +39,10 @@ fn main() {
 
     let mut playing = true;
     while playing {
+
         let now = Instant::now();
         let dt = now.duration_since(past);
         past = now;
-
-        // Clear terminal
-        stdout.execute(terminal::Clear(terminal::ClearType::All)).unwrap();
 
         // Listen for input
         while let Ok(char) = input_receiver.try_recv() {
@@ -63,6 +61,8 @@ fn main() {
         game.update();
 
         // Render
+        // Clear terminal
+        stdout.execute(terminal::Clear(terminal::ClearType::All)).unwrap();
         game.render_map();
         stdout.flush().unwrap();
 
