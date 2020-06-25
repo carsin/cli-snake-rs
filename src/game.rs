@@ -1,5 +1,5 @@
 use std::io::stdout;
-use crossterm::{cursor, QueueableCommand, style::Print};
+use crossterm::{cursor, ExecutableCommand, QueueableCommand, style::Print};
 use rand::Rng;
 
 #[derive(PartialEq, Copy, Clone)]
@@ -34,7 +34,7 @@ pub struct Game {
     pub height: usize,
     pub tiles: Vec<Tile>,
     pub snake: Snake,
-    pub playing: bool,
+    pub running: bool,
 }
 
 impl Game {
@@ -44,7 +44,7 @@ impl Game {
             height,
             tiles: vec![],
             snake,
-            playing: false,
+            running: false,
         };
 
         new_game.init_map();
@@ -99,7 +99,6 @@ impl Game {
             Direction::South => self.snake.y += 1,
             Direction::East => self.snake.x += 1,
             Direction::West => self.snake.x -= 1,
-            _ => (),
         }
 
         // Set snake on map
@@ -130,14 +129,14 @@ impl Game {
                 };
 
                 stdout().queue(cursor::MoveTo((x * 2) as u16, y as u16)).unwrap()
-                        .queue(Print(current_char)).unwrap();
+                        .execute(Print(current_char)).unwrap();
             }
         }
     }
 
     pub fn handle_input(&mut self, input_char: char) {
         match input_char {
-            'q' => self.playing = false,
+            'q' => self.running = false,
             'w' => self.snake.direction = self::Direction::North,
             'a' => self.snake.direction = self::Direction::West,
             's' => self.snake.direction = self::Direction::South,
