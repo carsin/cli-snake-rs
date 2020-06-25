@@ -34,6 +34,7 @@ pub struct Game {
     pub height: usize,
     pub tiles: Vec<Tile>,
     pub snake: Snake,
+    pub playing: bool,
 }
 
 impl Game {
@@ -43,6 +44,7 @@ impl Game {
             height,
             tiles: vec![],
             snake,
+            playing: false,
         };
 
         new_game.init_map();
@@ -130,6 +132,18 @@ impl Game {
                 stdout().queue(cursor::MoveTo((x * 2) as u16, y as u16)).unwrap()
                         .queue(Print(current_char)).unwrap();
             }
+        }
+    }
+
+    pub fn handle_input(&mut self, input_char: char) {
+        match input_char {
+            'q' => self.playing = false,
+            'w' => self.snake.direction = self::Direction::North,
+            'a' => self.snake.direction = self::Direction::West,
+            's' => self.snake.direction = self::Direction::South,
+            'd' => self.snake.direction = self::Direction::East,
+            'r' => self.place_apple(),
+            _ => (),
         }
     }
 }

@@ -1,7 +1,7 @@
 extern crate crossterm;
 
 use crossterm::{cursor, terminal, ExecutableCommand};
-use std::io::{stdin, stdout, Read, Write};
+use std::io::{stdout, Write};
 use std::thread::sleep;
 use std::time::{Duration, Instant};
 
@@ -30,24 +30,15 @@ fn main() {
     let update_speed = Duration::from_millis(1000 / TICK_SPEED);
     let mut past = Instant::now();
 
-    let mut playing = true;
-    while playing {
-
+    game.playing = true;
+    while game.playing {
         let now = Instant::now();
         let dt = now.duration_since(past);
         past = now;
 
         // Listen for input
         while let Ok(char) = input_receiver.try_recv() {
-            match char {
-                'q' => playing = false,
-                'w' => game.snake.direction = game::Direction::North,
-                'a' => game.snake.direction = game::Direction::West,
-                's' => game.snake.direction = game::Direction::South,
-                'd' => game.snake.direction = game::Direction::East,
-                'r' => game.place_apple(),
-                _ => (),
-            }
+            game.handle_input(char);
         }
 
         // Update
