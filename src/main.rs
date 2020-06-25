@@ -1,19 +1,20 @@
 extern crate crossterm;
 
-use crossterm::{cursor, terminal, ExecutableCommand, QueueableCommand, style::Print};
+use crossterm::{cursor, terminal, ExecutableCommand};
 use std::io::stdout;
 use std::thread::sleep;
 use std::time::{Duration, Instant};
 
 const GAME_WIDTH: usize = 30;
 const GAME_HEIGHT: usize = GAME_WIDTH;
-const UPS: u64 = 10;
-const UPDATE_SPEED: Duration = Duration::from_millis(1000 / UPS);
+const UPDATES_PER_SECONDS: u64 = 10;
+const UPDATE_SPEED: Duration = Duration::from_millis(1000 / UPDATES_PER_SECONDS);
 
 mod game;
 mod input;
 
 fn main() {
+    // Set up terminal
     stdout().execute(terminal::EnterAlternateScreen).unwrap();
     terminal::enable_raw_mode().unwrap();
     stdout().execute(cursor::Hide).unwrap();
@@ -46,6 +47,7 @@ fn run(update_speed: Duration, mut game: game::Game) {
             while let Ok(char) = input_receiver.try_recv() {
                 game.handle_input(char);
             }
+
             // Update
             game.update();
 

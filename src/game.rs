@@ -128,6 +128,7 @@ impl Game {
                     },
                 };
 
+                // TODO: Refactor rendering structure
                 stdout().queue(cursor::MoveTo((x * 2) as u16, y as u16)).unwrap()
                         .execute(Print(current_char)).unwrap();
             }
