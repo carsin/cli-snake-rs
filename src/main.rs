@@ -2,7 +2,6 @@ extern crate crossterm;
 
 use crossterm::{cursor, terminal, ExecutableCommand};
 use std::io::{stdin, stdout, Read, Write};
-use std::sync::mpsc::channel;
 use std::thread::sleep;
 use std::time::{Duration, Instant};
 
@@ -11,6 +10,7 @@ const GAME_HEIGHT: usize = GAME_WIDTH;
 const TICK_SPEED: u64 = 5;
 
 mod game;
+mod input;
 
 fn main() {
     let mut stdout = stdout();
@@ -20,14 +20,7 @@ fn main() {
     stdout.execute(cursor::Hide).unwrap();
 
     // Set up input
-    let (input_sender, input_receiver) = channel::<char>();
-    std::thread::spawn(move || {
-        loop {
-            let mut buf = [0u8; 1];
-            stdin().read_exact(&mut buf).unwrap();
-            input_sender.send(buf[0] as char).unwrap();
-        }
-    });
+    let input_receiver = input::start_input_receiver();
 
     // Set up game
     let snake = game::Snake::new(1, 4, GAME_HEIGHT / 2, game::Direction::East);
