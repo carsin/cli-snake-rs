@@ -4,7 +4,7 @@ use rand::Rng;
 
 #[derive(PartialEq, Copy, Clone)]
 pub enum Tile {
-    WallVert, WallHorz, Empty, Apple, Snake
+    Wall, Empty, Apple, Snake
 }
 
 pub enum Direction {
@@ -56,16 +56,16 @@ impl Game {
         // Border the map with walls
         for x in 0..self.width {
             let top = self.get_index(x, 0);
-            self.tiles[top] = Tile::WallHorz;
+            self.tiles[top] = Tile::Wall;
             let bot = self.get_index(x, self.height - 1);
-            self.tiles[bot] = Tile::WallHorz;
+            self.tiles[bot] = Tile::Wall;
         }
 
         for y in 0..self.height {
             let left = self.get_index(0, y);
-            self.tiles[left] = Tile::WallVert;
+            self.tiles[left] = Tile::Wall;
             let right = self.get_index(self.width - 1, y);
-            self.tiles[right] = Tile::WallVert;
+            self.tiles[right] = Tile::Wall;
         }
 
         self.place_apple();
@@ -114,15 +114,8 @@ impl Game {
                     Tile::Empty => {
                         current_char = String::from("  ");
                     },
-                    Tile::WallHorz => {
-                        // left
-                        if self.tiles[self.get_index(x - 1, y)] == Tile::WallVert {
-
-                        }
-                        current_char = String::from("══");
-                    },
-                    Tile::WallVert => {
-                        current_char = String::from("┃┃");
+                    Tile::Wall => {
+                        current_char = String::from("▒▒");
                     },
                     Tile::Apple => {
                         current_char = String::from("╪╪");
@@ -133,7 +126,7 @@ impl Game {
                 };
 
                 // TODO: Refactor rendering structure
-                stdout().queue(cursor::MoveTo((x * 2) as u16, y as u16)).unwrap()
+                stdout().queue(cursor::MoveTo((x * 2) as u16, (y + 2) as u16)).unwrap()
                         .execute(Print(current_char)).unwrap();
             }
         }
