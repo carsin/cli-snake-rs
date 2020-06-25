@@ -53,7 +53,7 @@ fn run(update_speed: Duration, mut game: game::Game) {
 
             // Render
             if current_time < next_time {
-                stdout().execute(terminal::Clear(terminal::ClearType::All)).unwrap();
+                // stdout().execute(terminal::Clear(terminal::ClearType::All)).unwrap();
                 game.render_map();
             }
         } else {

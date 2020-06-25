@@ -115,6 +115,10 @@ impl Game {
                         current_char = String::from("  ");
                     },
                     Tile::WallHorz => {
+                        // left
+                        if self.tiles[self.get_index(x - 1, y)] == Tile::WallVert {
+
+                        }
                         current_char = String::from("══");
                     },
                     Tile::WallVert => {
