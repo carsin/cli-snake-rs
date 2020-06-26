@@ -54,8 +54,6 @@ fn run(update_speed: Duration, mut game: game::Game) {
 
                 // Render if we've updated
                 if current_time < next_time {
-                    stdout().execute(cursor::MoveTo(0, 0)).unwrap();
-                    print!("render time: {:?}", (next_time - current_time));
                     game.render_map();
                 }
             } else {
@@ -68,8 +66,6 @@ fn run(update_speed: Duration, mut game: game::Game) {
         } else {
             let sleep_time = next_time.duration_since(current_time);
             if sleep_time > Duration::new(0, 0) {
-                stdout().execute(cursor::MoveTo(0, 1)).unwrap();
-                print!("sleeping for {:?}", sleep_time);
                 sleep(sleep_time);
             }
         }

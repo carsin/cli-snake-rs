@@ -64,7 +64,6 @@ impl Game {
     pub fn update_snake(&mut self) {
         // Insert latest snake position into front of tail
         self.snake.tail.insert(0, Position { x: self.snake.x, y: self.snake.y });
-        println!("TAIL LEN: {}, GAME LEN: {}", self.snake.tail.len(), self.snake.length);
         // Get position of last tail tile
         let dead_tail_index = self.get_index(self.snake.tail[self.snake.length - 1].x, self.snake.tail[self.snake.length - 1].y);
         // Set last tail tile to empty
@@ -160,7 +159,7 @@ impl Game {
                     },
                 };
 
-                stdout().queue(cursor::MoveTo((x * 2) as u16, (y + 2) as u16)).unwrap()
+                stdout().queue(cursor::MoveTo((x * 2) as u16, y as u16)).unwrap()
                         .execute(Print(current_char)).unwrap();
             }
         }
