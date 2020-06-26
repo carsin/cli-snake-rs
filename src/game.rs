@@ -66,28 +66,54 @@ impl Game {
         let head = self.get_index(self.snake.x, self.snake.y);
         self.tiles[head] = Tile::Empty;
 
-        // Move snake
-        // TODO: Implement checks for next movement (wall / snake = lose, apple = grow)
+        // Update snake
         match self.snake.direction {
             Direction::North => {
-                // Check tile above
-                if self.tiles[self.get_index(self.snake.x, self.snake.y - 1)] == Tile::Wall {
-                    self.snake.alive = false;
-                } else {
-                    self.snake.y -= 1;
+                match self.tiles[self.get_index(self.snake.x, self.snake.y - 1)] {
+                    Tile::Wall | Tile::Snake => self.snake.alive = false,
+                    Tile::Empty => self.snake.y -= 1,
+                    Tile::Apple => {
+                        self.snake.length += 1;
+                        self.snake.y -= 1;
+                        self.place_apple();
+                    },
                 }
             },
 
             Direction::South => {
-                self.snake.y += 1;
-            },
-
-            Direction::East => {
-                self.snake.x += 1;
+                match self.tiles[self.get_index(self.snake.x, self.snake.y + 1)] {
+                    Tile::Wall | Tile::Snake => self.snake.alive = false,
+                    Tile::Empty => self.snake.y += 1,
+                    Tile::Apple => {
+                        self.snake.length += 1;
+                        self.snake.y += 1;
+                        self.place_apple();
+                    },
+                }
             },
 
             Direction::West => {
-                self.snake.x -= 1;
+                match self.tiles[self.get_index(self.snake.x - 1, self.snake.y)] {
+                    Tile::Wall | Tile::Snake => self.snake.alive = false,
+                    Tile::Empty => self.snake.x -= 1,
+                    Tile::Apple => {
+                        self.snake.length += 1;
+                        self.snake.x -= 1;
+                        self.place_apple();
+                    },
+                }
+            },
+
+            Direction::East => {
+                match self.tiles[self.get_index(self.snake.x + 1, self.snake.y)] {
+                    Tile::Wall | Tile::Snake => self.snake.alive = false,
+                    Tile::Empty => self.snake.x += 1,
+                    Tile::Apple => {
+                        self.snake.length += 1;
+                        self.snake.x += 1;
+                        self.place_apple();
+                    },
+                }
             },
         }
 
