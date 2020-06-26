@@ -59,8 +59,10 @@ fn run(mut game: game::Game) {
                 stdout().queue(terminal::Clear(terminal::ClearType::All)).unwrap()
                         .queue(cursor::MoveTo(0, 0)).unwrap()
                         .queue(Print("GAME OVER")).unwrap()
-                        .queue(cursor::MoveTo(0, 1)).unwrap()
-                        .execute(Print("Press 'q' to exit")).unwrap();
+                        .queue(cursor::MoveTo(0, 1)).unwrap();
+                    println!("YOUR SCORE: {}", game.snake.length);
+                    stdout().queue(cursor::MoveTo(0, 2)).unwrap()
+                            .execute(Print("Press 'q' to exit")).unwrap();
             }
         } else {
             let sleep_time = next_time.duration_since(current_time);

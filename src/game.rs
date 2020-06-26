@@ -17,7 +17,7 @@ struct Position {
 }
 
 pub struct Snake {
-    length: usize,
+    pub length: usize,
     tail: Vec<Position>,
     pub alive: bool,
     x: usize,
