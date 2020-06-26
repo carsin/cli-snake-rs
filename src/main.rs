@@ -1,6 +1,6 @@
 extern crate crossterm;
 
-use crossterm::{cursor, terminal, ExecutableCommand};
+use crossterm::{cursor, terminal, ExecutableCommand, QueueableCommand, style::Print};
 use std::io::stdout;
 use std::thread::sleep;
 use std::time::{Duration, Instant};
@@ -48,14 +48,22 @@ fn run(update_speed: Duration, mut game: game::Game) {
                 game.handle_input(char);
             }
 
-            // Update
-            game.update();
+            if game.snake.alive {
+                // Update
+                game.update_snake();
 
-            // Render if we've updated
-            if current_time < next_time {
-                stdout().execute(cursor::MoveTo(0, 0)).unwrap();
-                print!("render time: {:?}", (next_time - current_time));
-                game.render_map();
+                // Render if we've updated
+                if current_time < next_time {
+                    stdout().execute(cursor::MoveTo(0, 0)).unwrap();
+                    print!("render time: {:?}", (next_time - current_time));
+                    game.render_map();
+                }
+            } else {
+                stdout().queue(terminal::Clear(terminal::ClearType::All)).unwrap()
+                        .queue(cursor::MoveTo(0, 0)).unwrap()
+                        .queue(Print("GAME OVER")).unwrap()
+                        .queue(cursor::MoveTo(0, 1)).unwrap()
+                        .execute(Print("Press 'q' to exit")).unwrap();
             }
         } else {
             let sleep_time = next_time.duration_since(current_time);

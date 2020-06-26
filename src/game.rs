@@ -1,5 +1,5 @@
 use std::io::stdout;
-use crossterm::{cursor, ExecutableCommand, QueueableCommand, style::Print};
+use crossterm::{cursor, terminal, ExecutableCommand, QueueableCommand, style::Print};
 use rand::Rng;
 
 #[derive(PartialEq, Copy, Clone)]
@@ -11,17 +11,27 @@ pub enum Direction {
     North, South, East, West
 }
 
+struct Position {
+    x: usize,
+    y: usize,
+}
+
 pub struct Snake {
-    pub length: usize,
-    pub x: usize,
-    pub y: usize,
-    pub direction: Direction,
+    length: usize,
+    tail: Vec<Position>,
+    pub alive: bool,
+    x: usize,
+    y: usize,
+    direction: Direction,
+
 }
 
 impl Snake {
     pub fn new(init_length: usize, init_x: usize, init_y: usize, init_direction: Direction) -> Self {
         Snake {
             length: init_length,
+            tail: vec![],
+            alive: true,
             x: init_x,
             y: init_y,
             direction: init_direction,
@@ -51,24 +61,39 @@ impl Game {
         new_game
     }
 
-    fn init_map(&mut self) {
-        self.tiles = vec![Tile::Empty; self.width * self.height];
-        // Border the map with walls
-        for x in 0..self.width {
-            let top = self.get_index(x, 0);
-            self.tiles[top] = Tile::Wall;
-            let bot = self.get_index(x, self.height - 1);
-            self.tiles[bot] = Tile::Wall;
+    pub fn update_snake(&mut self) {
+        // Update tail
+        let head = self.get_index(self.snake.x, self.snake.y);
+        self.tiles[head] = Tile::Empty;
+
+        // Move snake
+        // TODO: Implement checks for next movement (wall / snake = lose, apple = grow)
+        match self.snake.direction {
+            Direction::North => {
+                // Check tile above
+                if self.tiles[self.get_index(self.snake.x, self.snake.y - 1)] == Tile::Wall {
+                    self.snake.alive = false;
+                } else {
+                    self.snake.y -= 1;
+                }
+            },
+
+            Direction::South => {
+                self.snake.y += 1;
+            },
+
+            Direction::East => {
+                self.snake.x += 1;
+            },
+
+            Direction::West => {
+                self.snake.x -= 1;
+            },
         }
 
-        for y in 0..self.height {
-            let left = self.get_index(0, y);
-            self.tiles[left] = Tile::Wall;
-            let right = self.get_index(self.width - 1, y);
-            self.tiles[right] = Tile::Wall;
-        }
-
-        self.place_apple();
+        // Set snake on map
+        let index = self.get_index(self.snake.x, self.snake.y);
+        self.tiles[index] = Tile::Snake;
     }
 
     pub fn place_apple(&mut self) {
@@ -81,29 +106,6 @@ impl Game {
                 placing = false;
             }
         }
-    }
-
-    fn get_index(&self, x: usize, y: usize) -> usize {
-        (y * self.width) + x
-    }
-
-    pub fn update(&mut self) {
-        // Update tail
-        let index = self.get_index(self.snake.x, self.snake.y);
-        self.tiles[index] = Tile::Empty;
-
-        // Move snake
-        // TODO: Implement checks for next movement (wall / snake = lose, apple = grow)
-        match self.snake.direction {
-            Direction::North => self.snake.y -= 1,
-            Direction::South => self.snake.y += 1,
-            Direction::East => self.snake.x += 1,
-            Direction::West => self.snake.x -= 1,
-        }
-
-        // Set snake on map
-        let index = self.get_index(self.snake.x, self.snake.y);
-        self.tiles[index] = Tile::Snake;
     }
 
     pub fn render_map(&self) {
@@ -125,11 +127,35 @@ impl Game {
                     },
                 };
 
-                // TODO: Refactor rendering structure
                 stdout().queue(cursor::MoveTo((x * 2) as u16, (y + 2) as u16)).unwrap()
                         .execute(Print(current_char)).unwrap();
             }
         }
+    }
+
+
+    fn init_map(&mut self) {
+        self.tiles = vec![Tile::Empty; self.width * self.height];
+        // Border the map with walls
+        for x in 0..self.width {
+            let top = self.get_index(x, 0);
+            self.tiles[top] = Tile::Wall;
+            let bot = self.get_index(x, self.height - 1);
+            self.tiles[bot] = Tile::Wall;
+        }
+
+        for y in 0..self.height {
+            let left = self.get_index(0, y);
+            self.tiles[left] = Tile::Wall;
+            let right = self.get_index(self.width - 1, y);
+            self.tiles[right] = Tile::Wall;
+        }
+
+        self.place_apple();
+    }
+
+    fn get_index(&self, x: usize, y: usize) -> usize {
+        (y * self.width) + x
     }
 
     pub fn handle_input(&mut self, input_char: char) {
