@@ -1,5 +1,5 @@
 use std::io::stdout;
-use crossterm::{cursor, terminal, ExecutableCommand, QueueableCommand, style::Print};
+use crossterm::{cursor, ExecutableCommand, QueueableCommand, style::Print};
 use rand::Rng;
 
 #[derive(PartialEq, Copy, Clone)]
@@ -62,11 +62,15 @@ impl Game {
     }
 
     pub fn update_snake(&mut self) {
-        // Update tail
-        let head = self.get_index(self.snake.x, self.snake.y);
-        self.tiles[head] = Tile::Empty;
+        // Insert latest snake position into front of tail
+        self.snake.tail.insert(0, Position { x: self.snake.x, y: self.snake.y });
+        println!("TAIL LEN: {}, GAME LEN: {}", self.snake.tail.len(), self.snake.length);
+        // Get position of last tail tile
+        let dead_tail_index = self.get_index(self.snake.tail[self.snake.length - 1].x, self.snake.tail[self.snake.length - 1].y);
+        // Set last tail tile to empty
+        self.tiles[dead_tail_index] = Tile::Empty;
 
-        // Update snake
+        // Update snake based on direction and next tile
         match self.snake.direction {
             Direction::North => {
                 match self.tiles[self.get_index(self.snake.x, self.snake.y - 1)] {
@@ -117,9 +121,12 @@ impl Game {
             },
         }
 
+
+        // Truncate tail to length
+        self.snake.tail.truncate(self.snake.length - 1);
         // Set snake on map
-        let index = self.get_index(self.snake.x, self.snake.y);
-        self.tiles[index] = Tile::Snake;
+        let head_index = self.get_index(self.snake.x, self.snake.y);
+        self.tiles[head_index] = Tile::Snake;
     }
 
     pub fn place_apple(&mut self) {
