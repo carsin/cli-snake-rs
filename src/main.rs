@@ -5,9 +5,9 @@ use std::io::stdout;
 use std::thread::sleep;
 use std::time::{Duration, Instant};
 
-const GAME_WIDTH: usize = 30;
+const GAME_WIDTH: usize = 20;
 const GAME_HEIGHT: usize = GAME_WIDTH;
-const UPDATES_PER_SECONDS: u64 = 9;
+const UPDATES_PER_SECONDS: u64 = 6;
 const UPDATE_SPEED: Duration = Duration::from_millis(1000 / UPDATES_PER_SECONDS);
 
 mod game;
@@ -24,7 +24,7 @@ fn main() {
     let snake = game::Snake::new(1, 4, GAME_HEIGHT / 2, game::Direction::East);
     let game = game::Game::new(GAME_WIDTH, GAME_HEIGHT, snake);
 
-    run(UPDATE_SPEED, game);
+    run(game);
 
     // Restore terminal after game is finished
     stdout().execute(cursor::Show).unwrap();
@@ -33,16 +33,15 @@ fn main() {
     println!("Game exited");
 }
 
-fn run(update_speed: Duration, mut game: game::Game) {
+fn run(mut game: game::Game) {
     let input_receiver = input::start_input_receiver();
 
     let mut next_time = Instant::now();
-
     game.running = true;
     while game.running {
         let current_time = Instant::now();
         if current_time >= next_time {
-            next_time += update_speed;
+            next_time += UPDATE_SPEED;
             // Handle input
             while let Ok(char) = input_receiver.try_recv() {
                 game.handle_input(char);
